@@ -11,13 +11,27 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    // Разрешённые домены для проверки email
+    private $allowedDomains = ['gmail.com', 'mail.ru', 'yandex.ru', 'yahoo.com'];
+
     // Регистрация пользователя
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6'
+            'name' => 'required|string|max:255|regex:/^[a-zA-Zа-яА-ЯёЁ\s]+$/u',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'unique:users',
+                function ($attribute, $value, $fail) {
+                    $domain = substr(strrchr($value, "@"), 1);
+                    if (!in_array($domain, $this->allowedDomains)) {
+                        $fail('Почта должна быть зарегистрирована на одном из следующих доменов: gmail.com, mail.ru, yandex.ru, yahoo.com.');
+                    }
+                },
+            ],
+            'password' => 'required|string|min:6',
         ]);
 
         $user = User::create([
@@ -44,8 +58,8 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            $token = JWTAuth::parseToken(); // Проверяем, есть ли токен
-            JWTAuth::invalidate($token); // Инвалидируем токен
+            $token = JWTAuth::parseToken();
+            JWTAuth::invalidate($token);
             return response()->json(['message' => 'Вы успешно вышли'], 200);
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
             \Log::error('Ошибка выхода: токен недействителен - ' . $e->getMessage());
@@ -61,24 +75,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'Ошибка: ' . $e->getMessage()], 500);
         }
     }
-    
-    // Регистрация библиотекаря
-    public function registerLibrarian(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:librarians',
-            'password' => 'required|string|min:6'
-        ]);
 
-        $librarian = Librarian::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        return response()->json(['message' => 'Библиотекарь зарегистрирован'], 201);
-    }
 
     // Логин библиотекаря
     public function loginLibrarian(Request $request)
@@ -92,12 +89,12 @@ class AuthController extends Controller
         return response()->json(['token' => $token]);
     }
 
-     // Выход библиотекаря
+    // Выход библиотекаря
     public function logoutLibrarian()
     {
         try {
-            $token = JWTAuth::parseToken(); // Получаем текущий токен из заголовков запроса
-            JWTAuth::invalidate($token); // Инвалидируем токен, тем самым "выходя" из системы
+            $token = JWTAuth::parseToken();
+            JWTAuth::invalidate($token);
             return response()->json(['message' => 'Вы успешно вышли'], 200);
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
             \Log::error('Ошибка выхода: ' . $e->getMessage());
@@ -105,3 +102,4 @@ class AuthController extends Controller
         }
     }
 }
+

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
+use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
@@ -14,64 +15,50 @@ class BookController extends Controller
         return response()->json($books);
     }
 
-    public function store(StoreBookRequest $request)
+    public function store(Request $request)
     {
-        $book = Book::create($request->validated());
-        return response()->json(['message' => 'Книга добавлена', 'book' => $book], 201);
+        $request->validate([
+            'title' => 'required|string|max:255|unique:books,title',
+            'author' => 'required|string|max:255|regex:/^[\p{L}\s-]+$/u'
+        ]);
+
+        $book = Book::create([
+            'title' => $request->title,
+            'author' => $request->author
+        ]);
+
+        return response()->json(['message' => 'Книга успешно добавлена', 'book' => $book], 201);
     }
 
-    public function update(UpdateBookRequest $request, Book $book)
+    // Обновление данных книги
+    public function update(Request $request, $id)
     {
-        $book->update($request->validated());
-        return response()->json(['message' => 'Книга обновлена', 'book' => $book]);
+        $book = Book::find($id);
+
+        if (!$book) {
+            return response()->json(['error' => 'Книга не найдена'], 404);
+        }
+
+        $request->validate([
+            'title' => 'sometimes|required|string|max:255|unique:books,title,' . $id . ',id,author,' . $request->author,
+            'author' => 'sometimes|required|string|max:255|regex:/^[\p{L}\s-]+$/u',
+        ]);
+        
+        $book->update($request->only(['title', 'author']));
+
+        return response()->json(['message' => 'Книга успешно обновлена', 'book' => $book], 200);
     }
 
     public function destroy(Book $book)
-    {
+    {   
+        $book = Book::find($id);
+        
+        if (!$book) {
+            return response()->json(['error' => 'Книга не найдена'], 404);
+        }
+        
         $book->delete();
+        
         return response()->json(['message' => 'Книга удалена']);
     }
 }
-
-// namespace App\Http\Controllers;
-
-// use App\Models\Book;
-// use Illuminate\Http\Request;
-
-// class BookController extends Controller
-// {
-//     // Просмотр всех доступных книг
-//     public function index()
-//     {
-//         $books = Book::where('is_borrowed', false)->get();
-//         return response()->json($books);
-//     }
-
-//     // Создание книги (для библиотекарей)
-//     public function store(Request $request)
-//     {
-//         $request->validate([
-//             'title' => 'required|string',
-//             'author' => 'required|string',
-//         ]);
-
-//         $book = Book::create($request->all());
-
-//         return response()->json(['message' => 'Книга добавлена', 'book' => $book], 201);
-//     }
-
-//     // Обновление книги (для библиотекарей)
-//     public function update(Request $request, Book $book)
-//     {
-//         $book->update($request->all());
-//         return response()->json(['message' => 'Книга обновлена', 'book' => $book]);
-//     }
-
-//     // Удаление книги (для библиотекарей)
-//     public function destroy(Book $book)
-//     {
-//         $book->delete();
-//         return response()->json(['message' => 'Книга удалена']);
-//     }
-// }
-
