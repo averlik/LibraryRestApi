@@ -9,9 +9,20 @@ class Book extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'author', 'is_borrowed', 'borrowed_by'];
+    protected $fillable = [
+        'title', 
+        'author', 
+        'is_borrowed', 
+        'borrowed_by'
+    ];
 
     protected $casts = [
         'is_borrowed' => 'boolean',
     ];
+
+    public function borrowedBooks()
+    {
+        return $this->hasMany(BorrowedBook::class);
+    }
+
 }
