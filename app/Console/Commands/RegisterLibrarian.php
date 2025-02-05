@@ -5,11 +5,14 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Librarian;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class RegisterLibrarian extends Command
 {
     protected $signature = 'librarian:register {name} {email} {password}';
     protected $description = 'Регистрация нового библиотекаря';
+
+    private $allowedDomains = ['gmail.com', 'mail.ru', 'yandex.ru', 'yahoo.com'];
 
     public function handle()
     {
@@ -17,9 +20,31 @@ class RegisterLibrarian extends Command
         $email = $this->argument('email');
         $password = $this->argument('password');
 
-        // Проверяем, существует ли библиотекарь с таким email
-        if (Librarian::where('email', $email)->exists()) {
-            $this->error('Библиотекарь с таким email уже существует.');
+        $validator = Validator::make([
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+        ], [
+            'name' => 'required|string|max:255|regex:/^[a-zA-Zа-яА-ЯёЁ\s]+$/u',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'unique:librarians,email',
+                function ($attribute, $value, $fail) {
+                    $domain = substr(strrchr($value, "@"), 1);
+                    if (!in_array($domain, $this->allowedDomains)) {
+                        $fail('Почта должна быть зарегистрирована на одном из следующих доменов: gmail.com, mail.ru, yandex.ru, yahoo.com.');
+                    }
+                },
+            ],
+            'password' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $error) {
+                $this->error($error);
+            }
             return;
         }
 
