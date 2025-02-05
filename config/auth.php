@@ -1,7 +1,7 @@
 <?php
 return [
     'defaults' => [
-        'guard' => 'user', // По умолчанию обычный пользователь
+        'guard' => 'user', 
         'passwords' => 'users',
     ],
 
@@ -9,6 +9,11 @@ return [
         'user' => [
             'driver' => 'jwt',
             'provider' => 'users',
+        ],
+        'api' => [
+            'driver' => 'jwt',
+            'provider' => 'users',
+            'hash' => false,
         ],
         'librarian' => [
             'driver' => 'jwt',

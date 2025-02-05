@@ -6,23 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+
+    public function up()
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->string('author');
-            $table->integer('year');
+            $table->boolean('is_borrowed')->default(false);
+            $table->foreignId('borrowed_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
+    
     public function down(): void
     {
         Schema::dropIfExists('books');
