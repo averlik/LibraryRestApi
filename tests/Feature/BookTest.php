@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Book;
+use App\Models\BorrowedBook;
 use App\Models\User;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -66,4 +67,55 @@ class BookTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['title', 'author']);
     }
+
+    #[Test]
+    public function test_user_can_borrow_a_book()
+    {
+        $user = User::factory()->create(); // Создаём пользователя
+        $book = Book::factory()->create(['is_borrowed' => false]); // Создаём доступную книгу
+
+        // Пользователь берёт книгу
+        $response = $this->actingAs($user, 'user') // Используем 'user' guard
+            ->postJson("/api/books/{$book->id}/borrow");
+
+        // Проверка успешного ответа
+        $response->assertStatus(200)
+            ->assertJson(['message' => 'Книга успешно одолжена']);
+
+        // Проверка, что книга занята
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'is_borrowed' => true
+        ]);
+    }
+
+    #[Test]
+    public function test_user_can_return_a_book()
+    {
+        $user = User::factory()->create(); // Создаем пользователя
+        $book = Book::factory()->create(['is_borrowed' => true]); // Создаем занятую книгу
+
+        // Создаем запись о том, что пользователь взял книгу
+        BorrowedBook::factory()->create([
+            'user_id' => $user->id,
+            'book_id' => $book->id,
+            'is_returned' => false
+        ]);
+
+        // Пользователь возвращает книгу
+        $response = $this->actingAs($user, 'user')
+            ->postJson("/api/books/{$book->id}/return");
+
+        // Проверка успешного ответа
+        $response->assertStatus(200)
+            ->assertJson(['message' => 'Книга успешно возвращена']);
+
+        // Проверка, что книга снова доступна
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'is_borrowed' => false
+        ]);
+    }
+    
+
 }
