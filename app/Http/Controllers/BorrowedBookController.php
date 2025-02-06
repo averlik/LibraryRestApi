@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\BorrowedBook;
 use App\Models\Book;
+use App\Http\Resources\UserBorrowedBooksResource;
+use App\Http\Resources\BorrowedBookResource;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -13,15 +16,28 @@ class BorrowedBookController extends Controller
     // Просмотр всех записей (для библиотекарей)
     public function index()
     {
-        $borrowedBooks = BorrowedBook::with('user', 'book')->get();
-        return response()->json($borrowedBooks);
+        $usersWithBooks = User::whereHas('borrowedBooks')->with('borrowedBooks.book')->get();
+        return UserBorrowedBooksResource::collection($usersWithBooks);
     }
 
     // Просмотр одолжанных книг (для пользователя)
     public function userBorrowedBooks()
     {
-        $borrowedBooks = BorrowedBook::where('user_id', Auth::id())->with('book')->get();
-        return response()->json($borrowedBooks);
+
+        $user = Auth::user();
+        $borrowedBooks = BorrowedBook::where('user_id', $user->id)->get();
+
+        if ($borrowedBooks->isEmpty()) {
+            return response()->json([
+                'message' => 'У вас нет одолжанных книг.',
+                'borrowed_books' => []
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Вот ваш список одолжанных книг:',
+            'borrowed_books' => BorrowedBookResource::collection($borrowedBooks)
+        ]);
     }
 
     // Взять книгу
