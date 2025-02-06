@@ -1,71 +1,137 @@
-<<<<<<< HEAD
-# LibraryRestApi
-Тестовое задание 
-=======
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Вот как может выглядеть форматированный `README.md` с учетом вашего текста:
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
 
-## About Laravel
+# Library Rest API
+Это проект для управления библиотекой, который реализует REST API с использованием фреймворка Laravel.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Требования
+Перед тем как запустить проект, убедитесь, что у вас установлены:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP >= 8.0
+- Composer
+- MySQL (или MariaDB)
+- Laravel >= 9.x
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Установка
+### 1. Клонируйте репозиторий
+```bash
+git clone https://github.com/yourusername/library-rest-api.git
+cd library-rest-api
+```
 
-## Learning Laravel
+### 2. Установите зависимости с помощью Composer
+```bash
+composer install
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 3. Настройте файл .env
+Скопируйте файл `.env.example` в `.env`:
+```bash
+cp .env.example .env
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Настройте параметры подключения к базе данных в файле `.env`. Убедитесь, что MySQL настроен и доступен. Пример настроек:
+```bash
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=library
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 4. Создайте ключ приложения
+```bash
+php artisan key:generate
+```
 
-## Laravel Sponsors
+### 5. Запустите миграции
+```bash
+php artisan migrate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 6. Запустите сидеры для заполнения базы данных тестовыми данными
+```bash
+php artisan db:seed --class=BookSeeder
+```
 
-### Premium Partners
+### 7. Запустите локальный сервер:
+```bash
+php artisan serve
+```
+Теперь Rest API доступно по адресу `http://localhost:8000`.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Использование
+API имеет следующие конечные точки:
 
-## Contributing
+### Для пользователей:
+- **Регистрация пользователя**  
+  `POST /api/user/register`
+  
+- **Авторизация пользователя**  
+  `POST /api/user/login`
+  
+- **Выход пользователя**  
+  `POST /api/user/logout` (Требует авторизации)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Для библиотекарей:
+- **Авторизация библиотекаря**  
+  `POST /api/librarian/login`
+  
+- **Выход библиотекаря**  
+  `POST /api/librarian/logout` (Требует авторизации)
 
-## Code of Conduct
+### Маршруты для пользователей
+- **Просмотр доступных книг**  
+  `GET /api/books`  
+  Возвращает список всех доступных книг.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- **Взять книгу на абонемент**  
+  `POST /api/books/{book}/borrow`  
+  Где `{book}` — это ID книги. Запрос требует авторизации.
 
-## Security Vulnerabilities
+- **Сдать книгу**  
+  `POST /api/books/{book}/return`  
+  Где `{book}` — это ID книги. Запрос требует авторизации.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- **Просмотр всех одолженных книг пользователя**  
+  `GET /api/borrowed-books/user`  
+  Возвращает список всех книг, которые были одолжены текущим пользователем.
 
-## License
+### Маршруты для библиотекарей
+#### Управление книгами:
+- **Создание книги**  
+  `POST /api/librarian/books`  
+  Требует авторизации библиотекаря.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
->>>>>>> 89df452 (User auth)
+- **Просмотр всех книг**  
+  `GET /api/librarian/books`  
+  Возвращает список всех книг.
+
+- **Обновление книги**  
+  `PUT /api/librarian/books/{book}`  
+  Где `{book}` — это ID книги.
+
+- **Удаление книги**  
+  `DELETE /api/librarian/books/{book}`  
+  Где `{book}` — это ID книги.
+
+#### Управление одолженными книгами:
+- **Просмотр всех записей об одолженных книгах**  
+  `GET /api/librarian/borrowed-books`  
+  Возвращает список всех одолженных книг.
+
+### Регистрация библиотекаря через консоль
+Для регистрации нового библиотекаря используется команда:
+```bash
+php artisan librarian:register "Иван Иванов" "librarian@gmail.com" "password123"
+```
+
+
+### Тестирование
+#### Запуск тестов
+Для того чтобы запустить автотесты, используйте команду:
+```bash
+php artisan test
+```
+
