@@ -11,20 +11,25 @@
 - Composer
 - MySQL (или MariaDB)
 - Laravel >= 9.x
+- XAMPP
 
 ## Установка
-### 1. Клонируйте репозиторий
+
+### 1. Установите XAMPP
+Для работы с базой данных и локальным сервером необходимо установить XAMPP. После установки запустите Apache и MySQL через панель управления XAMPP.
+
+### 2. Клонируйте репозиторий
 ```bash
 git clone https://github.com/yourusername/LibraryRestApi.git
 cd LibraryRestApi
 ```
 
-### 2. Установите зависимости с помощью Composer
+### 3. Установите зависимости с помощью Composer
 ```bash
 composer install
 ```
 
-### 3. Настройте файл .env
+### 4. Настройте файл .env
 Скопируйте файл `.env.example` в `.env`:
 ```bash
 cp .env.example .env
@@ -40,22 +45,22 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-### 4. Создайте ключ приложения
+### 5. Создайте ключ приложения
 ```bash
 php artisan key:generate
 ```
 
-### 5. Запустите миграции
+### 6. Запустите миграции
 ```bash
 php artisan migrate
 ```
 
-### 6. Запустите сидеры для заполнения базы данных тестовыми данными
+### 7. Запустите сидеры для заполнения базы данных тестовыми данными
 ```bash
 php artisan db:seed --class=BookSeeder
 ```
 
-### 7. Запустите локальный сервер:
+### 8. Запустите локальный сервер:
 ```bash
 php artisan serve
 ```
