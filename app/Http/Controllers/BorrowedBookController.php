@@ -62,23 +62,24 @@ class BorrowedBookController extends Controller
 
     // Вернуть книгу
     public function return(Book $book)
-{
-    $borrowedBook = BorrowedBook::where('user_id', Auth::id())
-        ->where('book_id', $book->id)
-        ->where('is_returned', false)
-        ->first();
+    {
+        $borrowedBook = BorrowedBook::where('user_id', Auth::id())
+            ->where('book_id', $book->id)
+            ->where('is_returned', false)
+            ->first();
 
-    if (!$borrowedBook) {
-        return response()->json(['error' => 'Вы не брали эту книгу'], 403);
+        if (!$borrowedBook) {
+            return response()->json(['error' => 'Вы не брали эту книгу'], 403);
+        }
+
+        $borrowedBook->update([
+            'is_returned' => true,
+            'returned_at' => now(),
+        ]);
+
+        $book->update(['is_borrowed' => false]);
+
+        return response()->json(['message' => 'Книга успешно возвращена']);
     }
 
-    $borrowedBook->update([
-        'is_returned' => true,
-        'returned_at' => now(),
-    ]);
-
-    $book->update(['is_borrowed' => false]);
-
-    return response()->json(['message' => 'Книга успешно возвращена']);
-}
 }
